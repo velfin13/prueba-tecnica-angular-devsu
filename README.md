@@ -19,18 +19,14 @@ También tiene skeleton de carga, mensajes de error visibles, diseño responsive
 
 ## Requisitos
 
-- Node.js 22.22.3 o superior (lo pide Angular 22; probado con Node 24)
-- npm
+- Docker, para ejecutar la aplicación (ver abajo)
+- Node.js 22.22.3 o superior y npm, solo para correr las pruebas o compilar sin Docker (lo pide Angular 22; probado con Node 24)
 
 Angular 22 y TypeScript 6, por encima de los mínimos que pide la prueba.
 
 ## Cómo ejecutarlo
 
-Hacen falta dos procesos: el backend de la prueba y este frontend. Hay dos formas de levantarlos.
-
-### Opción A: Docker Compose (un solo comando)
-
-Solo requiere Docker. Descarga la imagen del backend desde Docker Hub (`velfin13/prueba-tecnica-backend-devsu`), compila el frontend y levanta los dos:
+Solo requiere Docker. El backend de la prueba se descarga como imagen desde Docker Hub (`velfin13/prueba-tecnica-backend-devsu`), así que no hace falta tener su código. Compose descarga esa imagen, compila el frontend y levanta los dos:
 
 ```bash
 docker compose up --build
@@ -38,30 +34,9 @@ docker compose up --build
 
 La aplicación queda en `http://localhost:8080`. Para detenerla: `docker compose down`. Los datos del backend viven en memoria, así que se pierden al detenerlo. La imagen del backend se construyó con `docker/backend.Dockerfile` a partir del proyecto original de la prueba, sin modificarlo.
 
-### Opción B: sin Docker
-
-**1. Backend.** Es el proyecto que entregan con la prueba (`repo-interview-main.zip`) y no está incluido en este repositorio. Hay que descomprimirlo en otra carpeta:
-
-```bash
-cd repo-interview-main
-npm install
-npm run start:dev
-```
-
-Queda en `http://localhost:3002`. Los datos viven en memoria, así que al reiniciarlo la lista queda vacía.
-
-**2. Frontend** (esta carpeta):
-
-```bash
-npm install
-npm start
-```
-
-Se abre en `http://localhost:4200`.
-
-El backend no tiene CORS habilitado, así que el servidor de desarrollo redirige las llamadas que empiezan con `/bp` hacia `http://localhost:3002` (ver `proxy.conf.json`). No hay que tocar el backend ni cambiar URLs.
-
 ## Pruebas unitarias
+
+Primero `npm install`. Después:
 
 ```bash
 npm test                 # modo watch
@@ -82,9 +57,9 @@ La salida queda en `dist/`. La app llama a la API con la ruta relativa `/bp`, de
 
 ## Docker (opcional)
 
-El `Dockerfile` compila la app en una etapa y copia solo los archivos estáticos a una imagen de nginx, así que la imagen final no lleva Node, `node_modules` ni código fuente (unos 90 MB). nginx sirve la aplicación y reenvía `/bp` al backend, que es lo que hace el proxy en desarrollo.
+El `Dockerfile` compila la app en una etapa y copia solo los archivos estáticos a una imagen de nginx, así que la imagen final no lleva Node, `node_modules` ni código fuente (unos 90 MB). nginx sirve la aplicación y reenvía `/bp` al backend. El backend no tiene CORS habilitado, por eso el servidor de desarrollo (`npm start`) hace lo mismo con `proxy.conf.json`.
 
-Con el backend corriendo en la máquina anfitriona (por ejemplo, levantado con la opción B). Si se prefiere correr los dos en contenedores, es más simple usar `docker compose` como se explicó arriba:
+Para correr solo el frontend, con el backend ya levantado en la máquina anfitriona (por ejemplo, con `docker run --rm -p 3002:3002 velfin13/prueba-tecnica-backend-devsu`). Si se quieren los dos juntos, es más simple `docker compose`, como se explicó arriba:
 
 ```bash
 docker build -t banco-frontend .
