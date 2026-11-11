@@ -56,7 +56,7 @@ npm test                 # modo watch
 npm run test:coverage    # una sola corrida con reporte de cobertura
 ```
 
-Hay 177 pruebas y la cobertura está en torno al 99%. El umbral mínimo está configurado en 70% en `angular.json`, y si no se cumple el comando falla. El reporte HTML queda en `coverage/`.
+Hay 187 pruebas y la cobertura está en torno al 99%. El umbral mínimo está configurado en 70% en `angular.json`, y si no se cumple el comando falla. El reporte HTML queda en `coverage/`.
 
 Uso Vitest y no Jest, porque es el ejecutor que trae Angular CLI por defecto en esta versión y la sintaxis es la misma (`describe`, `it`, `expect`).
 
