@@ -15,6 +15,10 @@ describe('toAppError', () => {
     expect(toAppError(http(0)).kind).toBe('network');
   });
 
+  it.each([502, 503, 504])('%i (backend inaccesible) → error de red', (status) => {
+    expect(toAppError(http(status)).kind).toBe('network');
+  });
+
   it('404 → not-found', () => {
     expect(toAppError(http(404)).kind).toBe('not-found');
   });

@@ -1,0 +1,38 @@
+<div class="table-scroll">
+  <table class="table">
+    <caption class="sr-only">Listado de productos financieros</caption>
+    <thead>
+      <tr>
+        <th scope="col">Logo</th>
+        <th scope="col">Nombre del producto</th>
+        <th scope="col">
+          Descripción
+          <span class="info" role="img" aria-label="Descripción del producto" title="Descripción del producto">i</span>
+        </th>
+        <th scope="col">
+          Fecha de liberación
+          <span class="info" role="img" aria-label="Fecha en que el producto se libera" title="Fecha en que el producto se libera para los clientes">i</span>
+        </th>
+        <th scope="col">
+          Fecha de reestructuración
+          <span class="info" role="img" aria-label="Fecha de revisión del producto" title="Fecha de revisión del producto">i</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products(); track product.id) {
+        <tr>
+          <td><app-product-logo [src]="product.logo" [name]="product.name" /></td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.description }}</td>
+          <td>{{ formatDate(product.dateRelease) }}</td>
+          <td>{{ formatDate(product.dateRevision) }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty" colspan="5">No se encontraron productos.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

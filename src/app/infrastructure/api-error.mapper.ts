@@ -16,6 +16,9 @@ export const toAppError = (error: unknown): AppError => {
   }
   switch (error.status) {
     case 0:
+    case 502:
+    case 503:
+    case 504:
       return new AppError('network', 'No se pudo conectar con el servidor. Verifica tu conexión.');
     case 404:
       return new AppError('not-found', 'No se encontró el producto solicitado.');

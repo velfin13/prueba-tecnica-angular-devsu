@@ -1,0 +1,44 @@
+.skeleton {
+  padding: 0.5rem 1rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 3rem repeat(4, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.875rem 0;
+}
+
+.row + .row {
+  border-top: 1px solid var(--color-border);
+}
+
+.bone {
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-bg) 50%, var(--color-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.circle {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bone {
+    animation: none;
+  }
+}

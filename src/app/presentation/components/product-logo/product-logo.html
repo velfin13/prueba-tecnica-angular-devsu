@@ -1,0 +1,5 @@
+@if (showImage()) {
+  <img class="logo" [src]="src()" alt="" (error)="onError()" />
+} @else {
+  <span class="logo avatar" aria-hidden="true">{{ initials() }}</span>
+}

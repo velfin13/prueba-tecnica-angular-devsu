@@ -1,0 +1,16 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar {
+  background: var(--color-avatar);
+  color: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+}

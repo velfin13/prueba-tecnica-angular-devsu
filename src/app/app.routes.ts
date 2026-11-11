@@ -6,4 +6,12 @@
 
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./presentation/pages/product-list/product-list-page').then((m) => m.ProductListPage),
+  },
+  { path: '**', redirectTo: '' },
+];

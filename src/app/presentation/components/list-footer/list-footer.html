@@ -1,0 +1,22 @@
+<footer class="footer">
+  <p class="count" aria-live="polite">{{ shown() }} Resultados</p>
+
+  <nav class="pager" aria-label="Paginación">
+    <button type="button" class="pager-btn" [disabled]="page() <= 1" (click)="pageChange.emit(page() - 1)">
+      Anterior
+    </button>
+    <span class="pager-info">Página {{ page() }} de {{ totalPages() }}</span>
+    <button type="button" class="pager-btn" [disabled]="page() >= totalPages()" (click)="pageChange.emit(page() + 1)">
+      Siguiente
+    </button>
+  </nav>
+
+  <label class="size">
+    <span class="sr-only">Registros por página</span>
+    <select class="select" [value]="pageSize()" (change)="onPageSize($event)">
+      @for (size of pageSizes; track size) {
+        <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
+      }
+    </select>
+  </label>
+</footer>

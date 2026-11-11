@@ -1,0 +1,40 @@
+<section class="page">
+  <div class="toolbar">
+    <label class="search">
+      <span class="sr-only">Buscar productos</span>
+      <input
+        class="search-input"
+        type="search"
+        placeholder="Search..."
+        autocomplete="off"
+        [value]="store.search()"
+        (input)="onSearch($event)"
+      />
+    </label>
+  </div>
+
+  <div class="card">
+    @switch (store.status()) {
+      @case ('loading') {
+        <app-table-skeleton />
+      }
+      @case ('error') {
+        <div class="error" role="alert">
+          <p class="error-message">{{ store.errorMessage() }}</p>
+          <button type="button" class="retry" (click)="store.load()">Reintentar</button>
+        </div>
+      }
+      @default {
+        <app-product-table [products]="store.page().items" />
+        <app-list-footer
+          [shown]="store.page().items.length"
+          [page]="store.page().page"
+          [totalPages]="store.page().totalPages"
+          [pageSize]="store.pageSize()"
+          (pageChange)="store.goToPage($event)"
+          (pageSizeChange)="store.setPageSize($event)"
+        />
+      }
+    }
+  </div>
+</section>
