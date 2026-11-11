@@ -1,59 +1,98 @@
-# Frontend
+# Productos financieros - Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.6.
+Prueba técnica de frontend. Es una aplicación en Angular para ver, buscar, crear, editar y eliminar los productos financieros de un banco, consumiendo el backend local que viene con la prueba.
 
-## Development server
+Autor: Velfin Velasquez (velfinvelasquez@gmail.com)
 
-To start a local development server, run:
+## Qué incluye
 
-```bash
-ng serve
-```
+| Funcionalidad | Estado |
+|---|---|
+| F1. Listado de productos | Hecho |
+| F2. Búsqueda por texto | Hecho |
+| F3. Cantidad de registros (5, 10, 20) y paginación | Hecho |
+| F4. Agregar producto, con validaciones | Hecho |
+| F5. Editar producto desde el menú contextual | Hecho |
+| F6. Eliminar producto con modal de confirmación | Hecho |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+También tiene skeleton de carga, mensajes de error visibles, diseño responsive y rutas con carga diferida. Los estilos están escritos a mano, sin librerías de UI ni de CSS.
 
-## Code scaffolding
+## Requisitos
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Node.js 22.22.3 o superior (lo pide Angular 22; probado con Node 24)
+- npm
 
-```bash
-ng generate component component-name
-```
+Angular 22 y TypeScript 6, por encima de los mínimos que pide la prueba.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Cómo ejecutarlo
 
-```bash
-ng generate --help
-```
+Hacen falta dos procesos: el backend de la prueba y este frontend.
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+**1. Backend** (carpeta `repo-interview-main`, el proyecto que entregan con la prueba):
 
 ```bash
-ng test
+cd repo-interview-main
+npm install
+npm run start:dev
 ```
 
-## Running end-to-end tests
+Queda en `http://localhost:3002`. Los datos viven en memoria, así que al reiniciarlo la lista queda vacía.
 
-For end-to-end (e2e) testing, run:
+**2. Frontend** (esta carpeta):
 
 ```bash
-ng e2e
+npm install
+npm start
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Se abre en `http://localhost:4200`.
 
-## Additional Resources
+El backend no tiene CORS habilitado, así que el servidor de desarrollo redirige las llamadas que empiezan con `/bp` hacia `http://localhost:3002` (ver `proxy.conf.json`). No hay que tocar el backend ni cambiar URLs.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Pruebas unitarias
+
+```bash
+npm test                 # modo watch
+npm run test:coverage    # una sola corrida con reporte de cobertura
+```
+
+Hay 177 pruebas y la cobertura está en torno al 99%. El umbral mínimo está configurado en 70% en `angular.json`, y si no se cumple el comando falla. El reporte HTML queda en `coverage/`.
+
+Uso Vitest y no Jest, porque es el ejecutor que trae Angular CLI por defecto en esta versión y la sintaxis es la misma (`describe`, `it`, `expect`).
+
+## Compilar para producción
+
+```bash
+npm run build
+```
+
+La salida queda en `dist/`. La app llama a la API con la ruta relativa `/bp`, de modo que en un despliegue real el servidor web tiene que reenviar esa ruta al backend (el proxy de desarrollo no existe en producción). La ruta base se define en `src/app/infrastructure/api.config.ts`.
+
+## Estructura
+
+```
+src/app/
+  domain/           Entidad Product, errores, reglas de búsqueda y paginación
+                    y el contrato del repositorio. No depende de la UI.
+  application/      Casos de uso (listar, crear, actualizar, eliminar,
+                    verificar ID, obtener por ID).
+  infrastructure/   Implementación HTTP del repositorio, conversión entre el
+                    formato de la API y el del dominio, traducción de errores.
+  presentation/     Páginas, componentes, validadores y mensajes del formulario.
+  shared/           Utilidades de fechas.
+```
+
+La idea es que las dependencias apunten hacia adentro. La interfaz usa los casos de uso, los casos de uso usan el repositorio como clase abstracta (`ProductRepository`), y en `app.config.ts` se indica cuál es la implementación real. Así las pruebas reemplazan el acceso a datos por un mock sin tocar la red, y un cambio en el formato de la API solo afecta a `infrastructure/`.
+
+## Decisiones y cosas a tener en cuenta
+
+- **Nombre de producto.** El enunciado pide mínimo 5 caracteres, pero el backend rechaza los de menos de 6 (`@MinLength(6)` en su DTO). El formulario valida con 5, como pide la prueba, así que un nombre de exactamente 5 caracteres pasa el formulario y el servidor lo devuelve como error, que se muestra en pantalla.
+- **Fecha de revisión.** Se calcula sola como un año después de la fecha de liberación y el campo está deshabilitado, como en el diseño. Si la liberación es un 29 de febrero y el año siguiente no es bisiesto, usa el 28.
+- **Edición y fecha pasada.** Un producto ya liberado tiene una fecha de liberación anterior a hoy y no se podría guardar si se exigiera siempre "igual o mayor a hoy". Por eso en edición esa regla solo se aplica si el usuario cambia la fecha.
+- **ID único.** Se consulta `GET /bp/products/verification/:id` mientras se escribe, con una espera de 300 ms y cancelando la consulta anterior. Si esa consulta falla, el formulario no se bloquea; el backend vuelve a rechazar el duplicado al guardar.
+- **Respuesta del PUT.** El backend no devuelve el `id` en la respuesta de actualización, así que la app usa el producto que se envió en lugar de lo que responde.
+- **Obtener un producto.** La API documentada no tiene consulta por ID, así que la pantalla de edición busca el producto dentro de la lista.
+- **Botón del modal.** El enunciado habla de un botón "Eliminar" y el diseño D4 muestra "Confirmar". Seguí el texto del enunciado.
+- **Contador de resultados.** Muestra cuántas filas se ven en la página actual, siguiendo lo que dice F3. La paginación indica en qué página se está y cuántas hay.
+- **Logos.** El campo `logo` es un texto (URL). Si la imagen no carga, se muestran las iniciales del producto en un círculo.
+- **Errores del servidor.** Nunca se muestra el `stack` que devuelve el backend, solo mensajes propios en español.
