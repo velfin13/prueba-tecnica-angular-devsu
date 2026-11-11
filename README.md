@@ -26,13 +26,13 @@ Angular 22 y TypeScript 6, por encima de los mínimos que pide la prueba.
 
 ## Cómo ejecutarlo
 
-Solo requiere Docker. El backend de la prueba se descarga como imagen desde Docker Hub (`velfin13/prueba-tecnica-backend-devsu`), así que no hace falta tener su código. Compose descarga esa imagen, compila el frontend y levanta los dos:
+Con Docker instalado, se levanta el backend (imagen `velfin13/prueba-tecnica-backend-devsu` de Docker Hub) y el frontend con un solo comando:
 
 ```bash
 docker compose up --build
 ```
 
-La aplicación queda en `http://localhost:8080`. Para detenerla: `docker compose down`. Los datos del backend viven en memoria, así que se pierden al detenerlo. La imagen del backend se construyó con `docker/backend.Dockerfile` a partir del proyecto original de la prueba, sin modificarlo.
+La aplicación queda en `http://localhost:8080`. Para detenerla: `docker compose down`. Los datos del backend viven en memoria, así que se pierden al detenerlo.
 
 ## Pruebas unitarias
 
