@@ -28,7 +28,7 @@ Angular 22 y TypeScript 6, por encima de los mínimos que pide la prueba.
 
 Hacen falta dos procesos: el backend de la prueba y este frontend.
 
-**1. Backend** (carpeta `repo-interview-main`, el proyecto que entregan con la prueba):
+**1. Backend.** Es el proyecto que entregan con la prueba (`repo-interview-main.zip`) y no está incluido en este repositorio. Hay que descomprimirlo en otra carpeta:
 
 ```bash
 cd repo-interview-main
