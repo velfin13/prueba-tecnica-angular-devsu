@@ -6,12 +6,15 @@
 
 import { ValidationErrors } from '@angular/forms';
 
-export const errorMessage = (errors: ValidationErrors | null): string => {
+const REQUIRED_MESSAGE = 'Este campo es requerido!';
+
+/** `requiredMessage` permite que un campo use su propio texto cuando está vacío (el diseño lo pide para el ID). */
+export const errorMessage = (errors: ValidationErrors | null, requiredMessage = REQUIRED_MESSAGE): string => {
   if (!errors) {
     return '';
   }
   if (errors['required']) {
-    return 'Este campo es requerido!';
+    return requiredMessage;
   }
   if (errors['minlength']) {
     return `Mínimo ${errors['minlength'].requiredLength} caracteres`;

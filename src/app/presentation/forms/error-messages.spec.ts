@@ -22,6 +22,14 @@ describe('errorMessage', () => {
     expect(errorMessage(errors)).toBe(expected);
   });
 
+  it('usa el texto propio del campo cuando está vacío', () => {
+    expect(errorMessage({ required: true }, 'ID no válido!')).toBe('ID no válido!');
+  });
+
+  it('el texto propio solo reemplaza al error de requerido', () => {
+    expect(errorMessage({ minlength: { requiredLength: 3 } }, 'ID no válido!')).toBe('Mínimo 3 caracteres');
+  });
+
   it('prioriza required sobre los demás errores', () => {
     expect(errorMessage({ required: true, minlength: { requiredLength: 3 } })).toBe('Este campo es requerido!');
   });

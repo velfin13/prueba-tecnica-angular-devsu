@@ -140,7 +140,7 @@ describe('ProductForm', () => {
     await fixture.whenStable();
 
     expect(emitted).toEqual([]);
-    expect(errorOf('id')).toBe('Este campo es requerido!');
+    expect(errorOf('id')).toBe('ID no válido!');
     expect(errorOf('name')).toBe('Este campo es requerido!');
     expect(errorOf('release')).toBe('Este campo es requerido!');
     expect(submitButton().getAttribute('aria-disabled')).toBe('true');

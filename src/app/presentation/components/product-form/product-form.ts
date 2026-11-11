@@ -15,6 +15,9 @@ import { dateNotInPast, requiredTrimmed, uniqueId } from '../../forms/product-va
 
 type FieldName = 'id' | 'name' | 'description' | 'logo' | 'dateRelease' | 'dateRevision';
 
+// Texto del diseño D2 para un ID vacío.
+const ID_REQUIRED_MESSAGE = 'ID no válido!';
+
 @Component({
   selector: 'app-product-form',
   imports: [ReactiveFormsModule],
@@ -66,7 +69,10 @@ export class ProductForm implements OnInit {
   protected message(field: FieldName): string {
     this.formEvents();
     const control = this.form.controls[field];
-    return control.invalid && (control.touched || control.dirty) ? errorMessage(control.errors) : '';
+    if (!control.invalid || !(control.touched || control.dirty)) {
+      return '';
+    }
+    return errorMessage(control.errors, field === 'id' ? ID_REQUIRED_MESSAGE : undefined);
   }
 
   protected hasError(field: FieldName): boolean {
