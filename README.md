@@ -68,6 +68,23 @@ npm run build
 
 La salida queda en `dist/`. La app llama a la API con la ruta relativa `/bp`, de modo que en un despliegue real el servidor web tiene que reenviar esa ruta al backend (el proxy de desarrollo no existe en producción). La ruta base se define en `src/app/infrastructure/api.config.ts`.
 
+## Docker (opcional)
+
+El `Dockerfile` compila la app en una etapa y copia solo los archivos estáticos a una imagen de nginx, así que la imagen final no lleva Node, `node_modules` ni código fuente (unos 90 MB). nginx sirve la aplicación y reenvía `/bp` al backend, que es lo que hace el proxy en desarrollo.
+
+Con el backend corriendo en la máquina anfitriona:
+
+```bash
+docker build -t banco-frontend .
+docker run --rm -p 8080:80 --add-host=host.docker.internal:host-gateway banco-frontend
+```
+
+Se abre en `http://localhost:8080`. Si el backend está en otra dirección, se indica con la variable `BACKEND_URL`:
+
+```bash
+docker run --rm -p 8080:80 -e BACKEND_URL=http://mi-backend:3002 banco-frontend
+```
+
 ## Estructura
 
 ```
