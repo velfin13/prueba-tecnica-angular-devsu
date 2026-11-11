@@ -1,0 +1,28 @@
+<button
+  #trigger
+  type="button"
+  class="trigger"
+  aria-haspopup="menu"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-label]="label()"
+  (click)="toggle()"
+>
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="5" r="1.8" />
+    <circle cx="12" cy="12" r="1.8" />
+    <circle cx="12" cy="19" r="1.8" />
+  </svg>
+</button>
+
+@if (isOpen()) {
+  <div
+    class="menu"
+    role="menu"
+    [style.top.px]="position().top"
+    [style.right.px]="position().right"
+    (keydown)="onMenuKeydown($event)"
+  >
+    <button type="button" class="item" role="menuitem" (click)="select('edit')">Editar</button>
+    <button type="button" class="item" role="menuitem" (click)="select('remove')">Eliminar</button>
+  </div>
+}

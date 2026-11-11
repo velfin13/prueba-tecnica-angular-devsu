@@ -17,6 +17,7 @@
           Fecha de reestructuración
           <span class="info" role="img" aria-label="Fecha de revisión del producto" title="Fecha de revisión del producto">i</span>
         </th>
+        <th scope="col"><span class="sr-only">Acciones</span></th>
       </tr>
     </thead>
     <tbody>
@@ -27,10 +28,17 @@
           <td>{{ product.description }}</td>
           <td>{{ formatDate(product.dateRelease) }}</td>
           <td>{{ formatDate(product.dateRevision) }}</td>
+          <td class="actions">
+            <app-actions-menu
+              [label]="'Acciones de ' + product.name"
+              (edit)="edit.emit(product)"
+              (remove)="remove.emit(product)"
+            />
+          </td>
         </tr>
       } @empty {
         <tr>
-          <td class="empty" colspan="5">No se encontraron productos.</td>
+          <td class="empty" colspan="6">No se encontraron productos.</td>
         </tr>
       }
     </tbody>

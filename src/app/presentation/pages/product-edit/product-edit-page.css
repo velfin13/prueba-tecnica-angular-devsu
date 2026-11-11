@@ -1,0 +1,45 @@
+.state {
+  margin: 3rem auto;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.message {
+  margin: 0 0 1rem;
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 0.25rem;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+}

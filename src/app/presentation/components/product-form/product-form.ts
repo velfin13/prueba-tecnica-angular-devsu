@@ -4,9 +4,9 @@
  * @description Formulario de producto reutilizable para alta y edición (solo presentación).
  */
 
-import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output } from '@angular/core';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { CheckProductIdUseCase } from '../../../application/product.use-cases';
 import { Product } from '../../../domain/product';
 import { addOneYear, todayIso } from '../../../shared/utils/date';
@@ -32,6 +32,9 @@ export class ProductForm implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly checkProductId = inject(CheckProductIdUseCase);
 
+  // Fecha de liberación original del producto en edición. Debe declararse antes de `form`, cuyos validadores la leen.
+  private originalRelease: string | null = null;
+
   protected readonly form = this.fb.group({
     id: this.fb.control('', {
       validators: [requiredTrimmed, Validators.minLength(3), Validators.maxLength(10)],
@@ -40,11 +43,12 @@ export class ProductForm implements OnInit {
     name: this.fb.control('', [requiredTrimmed, Validators.minLength(5), Validators.maxLength(100)]),
     description: this.fb.control('', [requiredTrimmed, Validators.minLength(10), Validators.maxLength(200)]),
     logo: this.fb.control('', [requiredTrimmed]),
-    dateRelease: this.fb.control('', [Validators.required, dateNotInPast]),
+    dateRelease: this.fb.control('', [Validators.required, (control) => this.releaseNotInPast(control)]),
     dateRevision: this.fb.control({ value: '', disabled: true }),
   });
 
   protected readonly minDate = todayIso();
+  protected readonly title = computed(() => (this.product() ? 'Formulario de Edición' : 'Formulario de Registro'));
 
   // Cualquier evento del formulario (valor, estado, touched) actualiza la vista, incluso el de validadores asíncronos.
   private readonly formEvents = toSignal(this.form.events);
@@ -90,14 +94,22 @@ export class ProductForm implements OnInit {
     });
   }
 
+  // En edición, una fecha de liberación ya pasada es válida mientras no se modifique.
+  private releaseNotInPast(control: AbstractControl): ValidationErrors | null {
+    return control.value === this.originalRelease ? null : dateNotInPast(control);
+  }
+
   private fillFromProduct(): void {
     const product = this.product();
+    this.originalRelease = null;
     if (!product) {
       this.form.controls.id.enable();
       return;
     }
     // Se deshabilita antes de cargar el valor para no validar contra el servidor un ID que ya existe.
+    this.originalRelease = product.dateRelease;
     this.form.controls.id.disable();
     this.form.patchValue(product);
+    this.form.controls.dateRevision.setValue(addOneYear(product.dateRelease));
   }
 }

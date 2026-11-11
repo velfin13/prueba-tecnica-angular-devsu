@@ -47,3 +47,9 @@ tbody tr + tr td {
   text-align: center;
   color: var(--color-muted);
 }
+
+.actions {
+  width: 1%;
+  padding-right: 0.5rem;
+  text-align: right;
+}

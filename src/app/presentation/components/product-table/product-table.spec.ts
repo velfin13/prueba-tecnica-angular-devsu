@@ -45,8 +45,27 @@ describe('ProductTable', () => {
     expect(root().querySelector('.empty')?.textContent).toContain('No se encontraron productos');
   });
 
-  it('incluye las cinco columnas del diseño', async () => {
+  it('emite edit y remove con el producto de la fila', async () => {
     await render([product]);
-    expect(root().querySelectorAll('thead th')).toHaveLength(5);
+    const edited: Product[] = [];
+    const removed: Product[] = [];
+    fixture.componentInstance.edit.subscribe((p) => edited.push(p));
+    fixture.componentInstance.remove.subscribe((p) => removed.push(p));
+
+    root().querySelector<HTMLButtonElement>('.trigger')!.click();
+    await fixture.whenStable();
+    root().querySelectorAll<HTMLButtonElement>('[role="menuitem"]')[0].click();
+
+    root().querySelector<HTMLButtonElement>('.trigger')!.click();
+    await fixture.whenStable();
+    root().querySelectorAll<HTMLButtonElement>('[role="menuitem"]')[1].click();
+
+    expect(edited).toEqual([product]);
+    expect(removed).toEqual([product]);
+  });
+
+  it('incluye las cinco columnas del diseño más la de acciones', async () => {
+    await render([product]);
+    expect(root().querySelectorAll('thead th')).toHaveLength(6);
   });
 });

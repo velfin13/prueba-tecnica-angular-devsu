@@ -1,5 +1,5 @@
 <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <h1 class="title">Formulario de Registro</h1>
+  <h1 class="title">{{ title() }}</h1>
 
   @if (submitError()) {
     <p class="submit-error" role="alert">{{ submitError() }}</p>

@@ -57,6 +57,11 @@ describe('ProductForm', () => {
     exists = vi.fn(() => of(false));
   });
 
+  it('muestra el título de registro', async () => {
+    await create();
+    expect(root().querySelector('h1')?.textContent).toContain('Formulario de Registro');
+  });
+
   it('no muestra errores al abrir el formulario', async () => {
     await create();
     expect(errorOf('id')).toBe('');
@@ -220,6 +225,34 @@ describe('ProductForm', () => {
       await fixture.whenStable();
 
       expect(emitted[0]).toMatchObject({ id: 'trj-crd', name: 'Nombre actualizado' });
+    });
+
+    it('muestra el título de edición', async () => {
+      await create(product);
+      expect(root().querySelector('h1')?.textContent).toContain('Formulario de Edición');
+    });
+
+    it('permite guardar con una fecha de liberación pasada si no se modifica', async () => {
+      await create({ ...product, dateRelease: '2000-01-01', dateRevision: '2001-01-01' });
+      const emitted: Product[] = [];
+      fixture.componentInstance.save.subscribe((p) => emitted.push(p));
+
+      submitButton().click();
+      await fixture.whenStable();
+
+      expect(errorOf('release')).toBe('');
+      expect(emitted).toHaveLength(1);
+    });
+
+    it('exige fecha actual o futura si se cambia la fecha de liberación', async () => {
+      await create({ ...product, dateRelease: '2000-01-01', dateRevision: '2001-01-01' });
+      await type('release', '2001-05-05');
+      expect(errorOf('release')).toBe('La fecha debe ser igual o mayor a la fecha actual');
+    });
+
+    it('recalcula la revisión como exactamente un año después de la liberación', async () => {
+      await create({ ...product, dateRevision: '2099-03-15' });
+      expect(input('revision').value).toBe('2100-03-15');
     });
 
     it('Reiniciar restaura los datos originales', async () => {

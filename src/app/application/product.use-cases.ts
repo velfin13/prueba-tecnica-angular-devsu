@@ -5,7 +5,8 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+import { AppError } from '../domain/app-error';
 import { Product } from '../domain/product';
 import { ProductRepository } from '../domain/product.repository';
 
@@ -14,6 +15,24 @@ export class GetProductsUseCase {
   private readonly repository = inject(ProductRepository);
   execute(): Observable<Product[]> {
     return this.repository.getAll();
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class GetProductByIdUseCase {
+  private readonly repository = inject(ProductRepository);
+
+  // La API documentada no expone una consulta por ID: se obtiene de la lista.
+  execute(id: string): Observable<Product> {
+    return this.repository.getAll().pipe(
+      map((products) => {
+        const product = products.find((item) => item.id === id);
+        if (!product) {
+          throw new AppError('not-found', 'No se encontró el producto solicitado.');
+        }
+        return product;
+      }),
+    );
   }
 }
 

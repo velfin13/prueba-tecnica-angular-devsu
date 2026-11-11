@@ -6,7 +6,7 @@
 
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { ProductRepository } from './domain/product.repository';
 import { HttpProductRepository } from './infrastructure/http-product.repository';
 import { routes } from './app.routes';
@@ -14,7 +14,7 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch()),
     // Enlaza la abstracción del repositorio con su implementación HTTP.
     { provide: ProductRepository, useClass: HttpProductRepository },

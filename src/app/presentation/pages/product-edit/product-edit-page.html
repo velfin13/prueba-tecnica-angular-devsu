@@ -1,0 +1,22 @@
+@switch (status()) {
+  @case ('loading') {
+    <p class="state" role="status">Cargando producto...</p>
+  }
+  @case ('error') {
+    <div class="state error" role="alert">
+      <p class="message">{{ loadError() }}</p>
+      <div class="actions">
+        <a class="btn btn-secondary" routerLink="/">Volver al listado</a>
+        <button type="button" class="btn btn-primary" (click)="load()">Reintentar</button>
+      </div>
+    </div>
+  }
+  @default {
+    <app-product-form
+      [product]="product()"
+      [saving]="saving()"
+      [submitError]="submitError()"
+      (save)="onSave($event)"
+    />
+  }
+}

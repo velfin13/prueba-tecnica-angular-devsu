@@ -18,5 +18,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./presentation/pages/product-create/product-create-page').then((m) => m.ProductCreatePage),
   },
+  {
+    path: 'products/:id/edit',
+    loadComponent: () =>
+      import('./presentation/pages/product-edit/product-edit-page').then((m) => m.ProductEditPage),
+  },
   { path: '**', redirectTo: '' },
 ];

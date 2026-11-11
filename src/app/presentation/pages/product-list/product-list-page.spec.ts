@@ -5,9 +5,9 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
-import { GetProductsUseCase } from '../../../application/product.use-cases';
+import { DeleteProductUseCase, GetProductsUseCase } from '../../../application/product.use-cases';
 import { AppError } from '../../../domain/app-error';
 import { Product } from '../../../domain/product';
 import { ProductListPage } from './product-list-page';
@@ -28,10 +28,14 @@ describe('ProductListPage', () => {
   const root = () => fixture.nativeElement as HTMLElement;
   const rows = () => root().querySelectorAll('tbody tr');
 
-  const setup = async (execute: () => unknown) => {
+  const setup = async (execute: () => unknown, remove: (id: string) => unknown = () => of(undefined)) => {
     TestBed.configureTestingModule({
       imports: [ProductListPage],
-      providers: [provideRouter([]), { provide: GetProductsUseCase, useValue: { execute } }],
+      providers: [
+        provideRouter([]),
+        { provide: GetProductsUseCase, useValue: { execute } },
+        { provide: DeleteProductUseCase, useValue: { execute: remove } },
+      ],
     });
     fixture = TestBed.createComponent(ProductListPage);
     await fixture.whenStable();
@@ -100,5 +104,82 @@ describe('ProductListPage', () => {
     root().querySelectorAll<HTMLButtonElement>('.pager-btn')[1].click();
     await fixture.whenStable();
     expect(root().querySelector('.pager-info')?.textContent).toContain('Página 2 de 3');
+  });
+
+  describe('menú contextual', () => {
+    const openMenu = async (row = 0) => {
+      root().querySelectorAll<HTMLButtonElement>('.trigger')[row].click();
+      await fixture.whenStable();
+    };
+    const clickItem = async (label: string) => {
+      const item = Array.from(root().querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(
+        (button) => button.textContent?.trim() === label,
+      )!;
+      item.click();
+      await fixture.whenStable();
+    };
+    const dialog = () => root().querySelector('[role="dialog"]');
+
+    it('Editar navega a la pantalla de edición del producto', async () => {
+      await setup(() => of(products));
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+      await openMenu(1);
+      await clickItem('Editar');
+
+      expect(navigate).toHaveBeenCalledWith(['/products', 'id-2', 'edit']);
+    });
+
+    it('Eliminar abre el modal con el nombre del producto', async () => {
+      await setup(() => of(products));
+      await openMenu(0);
+      await clickItem('Eliminar');
+
+      expect(dialog()?.textContent).toContain('¿Estás seguro de eliminar el producto Producto 1?');
+    });
+
+    it('Cancelar cierra el modal sin eliminar', async () => {
+      const remove = vi.fn(() => of(undefined));
+      await setup(() => of(products), remove);
+      await openMenu(0);
+      await clickItem('Eliminar');
+
+      dialog()!.querySelector<HTMLButtonElement>('.btn-secondary')!.click();
+      await fixture.whenStable();
+
+      expect(dialog()).toBeNull();
+      expect(remove).not.toHaveBeenCalled();
+      expect(rows()).toHaveLength(5);
+    });
+
+    it('Eliminar en el modal borra el producto de la tabla', async () => {
+      const remove = vi.fn(() => of(undefined));
+      await setup(() => of(products), remove);
+      await openMenu(0);
+      await clickItem('Eliminar');
+
+      dialog()!.querySelector<HTMLButtonElement>('.btn-primary')!.click();
+      await fixture.whenStable();
+
+      expect(remove).toHaveBeenCalledWith('id-1');
+      expect(dialog()).toBeNull();
+      expect(root().textContent).not.toContain('Producto 1 ');
+      expect(rows()[0].textContent).toContain('Producto 2');
+    });
+
+    it('muestra el error dentro del modal si la eliminación falla', async () => {
+      await setup(
+        () => of(products),
+        () => throwError(() => new AppError('network', 'No se pudo conectar con el servidor.')),
+      );
+      await openMenu(0);
+      await clickItem('Eliminar');
+
+      dialog()!.querySelector<HTMLButtonElement>('.btn-primary')!.click();
+      await fixture.whenStable();
+
+      expect(dialog()?.textContent).toContain('No se pudo conectar con el servidor.');
+      expect(rows()).toHaveLength(5);
+    });
   });
 });

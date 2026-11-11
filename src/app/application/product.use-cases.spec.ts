@@ -6,12 +6,14 @@
 
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { AppError } from '../domain/app-error';
 import { Product } from '../domain/product';
 import { ProductRepository } from '../domain/product.repository';
 import {
   CheckProductIdUseCase,
   CreateProductUseCase,
   DeleteProductUseCase,
+  GetProductByIdUseCase,
   GetProductsUseCase,
   UpdateProductUseCase,
 } from './product.use-cases';
@@ -46,6 +48,18 @@ describe('Casos de uso de producto', () => {
     TestBed.inject(GetProductsUseCase).execute().subscribe((r) => (result = r));
     expect(result).toEqual([product]);
     expect(repository.getAll).toHaveBeenCalledOnce();
+  });
+
+  it('GetProductByIdUseCase devuelve el producto con ese id', () => {
+    let result: Product | undefined;
+    TestBed.inject(GetProductByIdUseCase).execute('abc').subscribe((r) => (result = r));
+    expect(result).toEqual(product);
+  });
+
+  it('GetProductByIdUseCase falla con not-found si el id no existe', () => {
+    let error: AppError | undefined;
+    TestBed.inject(GetProductByIdUseCase).execute('zzz').subscribe({ error: (e) => (error = e) });
+    expect(error?.kind).toBe('not-found');
   });
 
   it('CreateProductUseCase delega en el repositorio', () => {

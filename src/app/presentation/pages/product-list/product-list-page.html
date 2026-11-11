@@ -26,7 +26,11 @@
         </div>
       }
       @default {
-        <app-product-table [products]="store.page().items" />
+        <app-product-table
+          [products]="store.page().items"
+          (edit)="onEdit($event)"
+          (remove)="store.requestDelete($event)"
+        />
         <app-list-footer
           [shown]="store.page().items.length"
           [page]="store.page().page"
@@ -38,4 +42,14 @@
       }
     }
   </div>
+
+  @if (store.pendingDelete(); as product) {
+    <app-confirm-dialog
+      [message]="'¿Estás seguro de eliminar el producto ' + product.name + '?'"
+      [busy]="store.deleting()"
+      [error]="store.deleteError()"
+      (confirm)="store.confirmDelete()"
+      (cancel)="store.cancelDelete()"
+    />
+  }
 </section>
