@@ -9,7 +9,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { DeleteProductUseCase, GetProductsUseCase } from '../../../application/product.use-cases';
 import { AppError } from '../../../domain/app-error';
 import { Product } from '../../../domain/product';
-import { ProductListStore } from './product-list.store';
+import { ProductListStore, SEARCH_DEBOUNCE_MS } from './product-list.store';
 
 const make = (n: number): Product => ({
   id: `id-${n}`,
@@ -69,13 +69,68 @@ describe('ProductListStore', () => {
     expect(store.page().items).toHaveLength(10);
   });
 
-  it('filtra por texto y vuelve a la primera página', () => {
-    const store = setup(() => of(products));
-    store.load();
-    store.goToPage(3);
-    store.setSearch('Producto 12');
-    expect(store.page().page).toBe(1);
-    expect(store.page().items.map((p) => p.id)).toEqual(['id-12']);
+  describe('búsqueda', () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    const loaded = () => {
+      const store = setup(() => of(products));
+      store.load();
+      return store;
+    };
+
+    it('filtra por texto y vuelve a la primera página', () => {
+      const store = loaded();
+      store.goToPage(3);
+      store.setSearch('Producto 12');
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      expect(store.page().page).toBe(1);
+      expect(store.page().items.map((p) => p.id)).toEqual(['id-12']);
+    });
+
+    it('muestra lo escrito al instante pero filtra recién tras la pausa', () => {
+      const store = loaded();
+      store.setSearch('Producto 12');
+      expect(store.search()).toBe('Producto 12');
+      expect(store.page().totalItems).toBe(12);
+
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS - 1);
+      expect(store.page().totalItems).toBe(12);
+
+      vi.advanceTimersByTime(1);
+      expect(store.page().totalItems).toBe(1);
+    });
+
+    it('con varias teclas seguidas filtra una sola vez con el último valor', () => {
+      const store = loaded();
+      store.setSearch('P');
+      vi.advanceTimersByTime(100);
+      store.setSearch('Pr');
+      vi.advanceTimersByTime(100);
+      store.setSearch('Producto 1');
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      expect(store.page().items.map((p) => p.id)).toEqual(['id-1', 'id-10', 'id-11', 'id-12']);
+    });
+
+    it('al borrar el texto vuelve a mostrar todo', () => {
+      const store = loaded();
+      store.setSearch('Producto 12');
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      store.setSearch('');
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      expect(store.page().totalItems).toBe(12);
+    });
+
+    it('mantiene el filtro aplicado si se elimina un producto', () => {
+      const store = loaded();
+      store.setSearch('Producto 1');
+      vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+      expect(store.page().totalItems).toBe(4);
+
+      store.requestDelete(products[0]);
+      store.confirmDelete();
+      expect(store.page().items.map((p) => p.id)).toEqual(['id-10', 'id-11', 'id-12']);
+    });
   });
 
   it('navega entre páginas', () => {

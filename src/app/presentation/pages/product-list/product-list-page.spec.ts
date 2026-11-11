@@ -10,6 +10,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { DeleteProductUseCase, GetProductsUseCase } from '../../../application/product.use-cases';
 import { AppError } from '../../../domain/app-error';
 import { Product } from '../../../domain/product';
+import { SEARCH_DEBOUNCE_MS } from './product-list.store';
 import { ProductListPage } from './product-list-page';
 
 const make = (n: number): Product => ({
@@ -27,6 +28,13 @@ describe('ProductListPage', () => {
   let fixture: ComponentFixture<ProductListPage>;
   const root = () => fixture.nativeElement as HTMLElement;
   const rows = () => root().querySelectorAll('tbody tr');
+  const typeInSearch = async (text: string) => {
+    const input = root().querySelector<HTMLInputElement>('.search-input')!;
+    input.value = text;
+    input.dispatchEvent(new Event('input'));
+    await new Promise((resolve) => setTimeout(resolve, SEARCH_DEBOUNCE_MS + 50));
+    await fixture.whenStable();
+  };
 
   const setup = async (execute: () => unknown, remove: (id: string) => unknown = () => of(undefined)) => {
     TestBed.configureTestingModule({
@@ -73,20 +81,14 @@ describe('ProductListPage', () => {
 
   it('filtra al escribir en el buscador', async () => {
     await setup(() => of(products));
-    const input = root().querySelector<HTMLInputElement>('.search-input')!;
-    input.value = 'Producto 12';
-    input.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
+    await typeInSearch('Producto 12');
     expect(rows()).toHaveLength(1);
     expect(root().querySelector('.count')?.textContent).toContain('1 Resultados');
   });
 
   it('muestra el mensaje vacío si la búsqueda no coincide', async () => {
     await setup(() => of(products));
-    const input = root().querySelector<HTMLInputElement>('.search-input')!;
-    input.value = 'zzz';
-    input.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
+    await typeInSearch('zzz');
     expect(root().querySelector('.empty')).not.toBeNull();
   });
 

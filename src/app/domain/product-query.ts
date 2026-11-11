@@ -25,14 +25,34 @@ const normalize = (value: string): string =>
     .toLowerCase()
     .trim();
 
-export const filterProducts = (products: Product[], term: string): Product[] => {
+// Los campos se unen con un salto de línea, que no se puede escribir en el buscador:
+// así un término nunca coincide a caballo entre dos campos.
+const FIELD_SEPARATOR = '\n';
+
+/** Productos junto a su texto de búsqueda ya normalizado, en la misma posición. */
+export interface SearchIndex {
+  products: Product[];
+  texts: string[];
+}
+
+/** Normaliza una sola vez al cargar, de modo que cada búsqueda posterior solo compare texto. */
+export const buildSearchIndex = (products: Product[]): SearchIndex => ({
+  products,
+  texts: products.map((product) => normalize([product.id, product.name, product.description].join(FIELD_SEPARATOR))),
+});
+
+export const searchProducts = (index: SearchIndex, term: string): Product[] => {
   const query = normalize(term);
   if (!query) {
-    return products;
+    return index.products;
   }
-  return products.filter((product) =>
-    [product.id, product.name, product.description].some((field) => normalize(field).includes(query)),
-  );
+  const matches: Product[] = [];
+  index.texts.forEach((text, position) => {
+    if (text.includes(query)) {
+      matches.push(index.products[position]);
+    }
+  });
+  return matches;
 };
 
 export const paginate = <T>(items: T[], page: number, pageSize: number): Page<T> => {

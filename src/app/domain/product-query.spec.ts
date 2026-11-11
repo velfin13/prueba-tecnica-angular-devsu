@@ -5,7 +5,7 @@
  */
 
 import { Product } from './product';
-import { filterProducts, paginate } from './product-query';
+import { buildSearchIndex, paginate, searchProducts } from './product-query';
 
 const make = (id: string, name: string, description = 'Descripción genérica'): Product => ({
   id,
@@ -22,28 +22,56 @@ const products = [
   make('prs-hip', 'Préstamo Hipotecario', 'Financia tu vivienda'),
 ];
 
-describe('filterProducts', () => {
+describe('searchProducts', () => {
+  const index = buildSearchIndex(products);
+  const ids = (term: string) => searchProducts(index, term).map((p) => p.id);
+
   it('devuelve todo si el término está vacío o son espacios', () => {
-    expect(filterProducts(products, '')).toBe(products);
-    expect(filterProducts(products, '   ')).toBe(products);
+    expect(searchProducts(index, '')).toBe(products);
+    expect(searchProducts(index, '   ')).toBe(products);
   });
 
   it('busca por nombre sin distinguir mayúsculas', () => {
-    expect(filterProducts(products, 'AHORROS').map((p) => p.id)).toEqual(['cta-aho']);
+    expect(ids('AHORROS')).toEqual(['cta-aho']);
   });
 
   it('ignora las tildes en ambos sentidos', () => {
-    expect(filterProducts(products, 'prestamo').map((p) => p.id)).toEqual(['prs-hip']);
-    expect(filterProducts(products, 'crédito').map((p) => p.id)).toEqual(['trj-crd']);
+    expect(ids('prestamo')).toEqual(['prs-hip']);
+    expect(ids('crédito')).toEqual(['trj-crd']);
   });
 
   it('busca por descripción y por id', () => {
-    expect(filterProducts(products, 'vivienda').map((p) => p.id)).toEqual(['prs-hip']);
-    expect(filterProducts(products, 'cta-').map((p) => p.id)).toEqual(['cta-aho']);
+    expect(ids('vivienda')).toEqual(['prs-hip']);
+    expect(ids('cta-')).toEqual(['cta-aho']);
+  });
+
+  it('conserva el orden original de los resultados', () => {
+    expect(ids('cuenta')).toEqual(['cta-aho']);
+    expect(ids('a')).toEqual(['trj-crd', 'cta-aho', 'prs-hip']);
   });
 
   it('devuelve vacío si no hay coincidencias', () => {
-    expect(filterProducts(products, 'zzz')).toEqual([]);
+    expect(ids('zzz')).toEqual([]);
+  });
+
+  it('no encuentra términos que cruzan el límite entre dos campos', () => {
+    // El id termina en "crd" y el nombre empieza por "tarjetas": no debe coincidir "crd tarjetas".
+    expect(ids('crd tarjetas')).toEqual([]);
+    expect(ids('crdtarjetas')).toEqual([]);
+  });
+
+  it('reutiliza el mismo índice para varias búsquedas', () => {
+    expect(ids('ahorros')).toEqual(['cta-aho']);
+    expect(ids('hipotecario')).toEqual(['prs-hip']);
+  });
+});
+
+describe('buildSearchIndex', () => {
+  it('guarda un texto normalizado por producto, en el mismo orden', () => {
+    const { texts } = buildSearchIndex(products);
+    expect(texts).toHaveLength(products.length);
+    expect(texts[2]).toContain('prestamo hipotecario');
+    expect(texts[2]).not.toMatch(/[A-ZÁÉÍÓÚ]/);
   });
 });
 
