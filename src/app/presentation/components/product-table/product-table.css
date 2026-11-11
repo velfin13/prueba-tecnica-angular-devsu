@@ -1,5 +1,7 @@
 .table-scroll {
   overflow-x: auto;
+  /* Contiene el texto .sr-only (absoluto) para que no ensanche la página en móvil. */
+  position: relative;
 }
 
 .table {
