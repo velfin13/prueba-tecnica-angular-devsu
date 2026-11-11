@@ -1,0 +1,16 @@
+# Levanta backend y frontend con un solo comando: docker compose up --build
+# La aplicación queda en http://localhost:8080
+services:
+  backend:
+    image: velfin13/prueba-tecnica-backend-devsu:latest
+    restart: unless-stopped
+
+  frontend:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      BACKEND_URL: http://backend:3002
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -26,7 +26,19 @@ Angular 22 y TypeScript 6, por encima de los mínimos que pide la prueba.
 
 ## Cómo ejecutarlo
 
-Hacen falta dos procesos: el backend de la prueba y este frontend.
+Hacen falta dos procesos: el backend de la prueba y este frontend. Hay dos formas de levantarlos.
+
+### Opción A: Docker Compose (un solo comando)
+
+Solo requiere Docker. Descarga la imagen del backend desde Docker Hub (`velfin13/prueba-tecnica-backend-devsu`), compila el frontend y levanta los dos:
+
+```bash
+docker compose up --build
+```
+
+La aplicación queda en `http://localhost:8080`. Para detenerla: `docker compose down`. Los datos del backend viven en memoria, así que se pierden al detenerlo. La imagen del backend se construyó con `docker/backend.Dockerfile` a partir del proyecto original de la prueba, sin modificarlo.
+
+### Opción B: sin Docker
 
 **1. Backend.** Es el proyecto que entregan con la prueba (`repo-interview-main.zip`) y no está incluido en este repositorio. Hay que descomprimirlo en otra carpeta:
 
@@ -72,7 +84,7 @@ La salida queda en `dist/`. La app llama a la API con la ruta relativa `/bp`, de
 
 El `Dockerfile` compila la app en una etapa y copia solo los archivos estáticos a una imagen de nginx, así que la imagen final no lleva Node, `node_modules` ni código fuente (unos 90 MB). nginx sirve la aplicación y reenvía `/bp` al backend, que es lo que hace el proxy en desarrollo.
 
-Con el backend corriendo en la máquina anfitriona:
+Con el backend corriendo en la máquina anfitriona (por ejemplo, levantado con la opción B). Si se prefiere correr los dos en contenedores, es más simple usar `docker compose` como se explicó arriba:
 
 ```bash
 docker build -t banco-frontend .
