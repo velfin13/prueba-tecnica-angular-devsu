@@ -1,0 +1,8 @@
+# Se carga antes de generar la configuración de nginx. Si el host del backend
+# no se puede resolver, nginx no arrancaría; en ese caso se apunta a una
+# dirección que rechaza la conexión y la app muestra su error de conexión.
+backend_host=$(echo "$BACKEND_URL" | sed -E 's#^[a-zA-Z]+://##; s#[/:].*$##')
+if ! getent hosts "$backend_host" >/dev/null 2>&1; then
+  echo "AVISO: no se puede resolver '$backend_host'. Las llamadas a /bp responderán 502." >&2
+  export BACKEND_URL=http://127.0.0.1:9
+fi

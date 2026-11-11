@@ -10,5 +10,6 @@ RUN npm run build
 FROM nginx:1.29-alpine
 ENV BACKEND_URL=http://host.docker.internal:3002
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --chmod=755 backend-fallback.envsh /docker-entrypoint.d/05-backend-fallback.envsh
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 EXPOSE 80

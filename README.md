@@ -79,7 +79,7 @@ docker build -t banco-frontend .
 docker run --rm -p 8080:80 --add-host=host.docker.internal:host-gateway banco-frontend
 ```
 
-Se abre en `http://localhost:8080`. Si el backend está en otra dirección, se indica con la variable `BACKEND_URL`:
+Se abre en `http://localhost:8080`. Si el contenedor no logra resolver la dirección del backend (por ejemplo, si se olvida el `--add-host` en Linux), igual arranca y muestra la aplicación; en el log aparece un aviso y las llamadas a `/bp` responden 502, que la app presenta como error de conexión. Si el backend está en otra dirección, se indica con la variable `BACKEND_URL`:
 
 ```bash
 docker run --rm -p 8080:80 -e BACKEND_URL=http://mi-backend:3002 banco-frontend
