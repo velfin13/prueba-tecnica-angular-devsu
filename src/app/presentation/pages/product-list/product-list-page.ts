@@ -5,6 +5,7 @@
  */
 
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ListFooter } from '../../components/list-footer/list-footer';
 import { ProductTable } from '../../components/product-table/product-table';
 import { TableSkeleton } from '../../components/table-skeleton/table-skeleton';
@@ -12,7 +13,7 @@ import { ProductListStore } from './product-list.store';
 
 @Component({
   selector: 'app-product-list-page',
-  imports: [ProductTable, TableSkeleton, ListFooter],
+  imports: [RouterLink, ProductTable, TableSkeleton, ListFooter],
   providers: [ProductListStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './product-list-page.html',

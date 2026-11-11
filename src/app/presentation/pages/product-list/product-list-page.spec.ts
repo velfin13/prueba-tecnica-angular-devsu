@@ -5,6 +5,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { GetProductsUseCase } from '../../../application/product.use-cases';
 import { AppError } from '../../../domain/app-error';
@@ -30,7 +31,7 @@ describe('ProductListPage', () => {
   const setup = async (execute: () => unknown) => {
     TestBed.configureTestingModule({
       imports: [ProductListPage],
-      providers: [{ provide: GetProductsUseCase, useValue: { execute } }],
+      providers: [provideRouter([]), { provide: GetProductsUseCase, useValue: { execute } }],
     });
     fixture = TestBed.createComponent(ProductListPage);
     await fixture.whenStable();
@@ -40,6 +41,13 @@ describe('ProductListPage', () => {
     await setup(() => new Subject<Product[]>());
     expect(root().querySelector('app-table-skeleton')).not.toBeNull();
     expect(root().querySelector('table')).toBeNull();
+  });
+
+  it('ofrece un botón Agregar que lleva al formulario de alta', async () => {
+    await setup(() => of(products));
+    const link = root().querySelector<HTMLAnchorElement>('a.add');
+    expect(link?.textContent).toContain('Agregar');
+    expect(link?.getAttribute('href')).toBe('/products/new');
   });
 
   it('muestra 5 filas y el contador al cargar', async () => {

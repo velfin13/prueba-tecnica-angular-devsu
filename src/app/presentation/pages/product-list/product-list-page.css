@@ -70,3 +70,21 @@
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0 1.5rem;
+  border-radius: 0.25rem;
+  background: var(--color-primary);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.add:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

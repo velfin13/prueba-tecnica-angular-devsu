@@ -13,5 +13,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./presentation/pages/product-list/product-list-page').then((m) => m.ProductListPage),
   },
+  {
+    path: 'products/new',
+    loadComponent: () =>
+      import('./presentation/pages/product-create/product-create-page').then((m) => m.ProductCreatePage),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -1,0 +1,58 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h1 class="title">Formulario de Registro</h1>
+
+  @if (submitError()) {
+    <p class="submit-error" role="alert">{{ submitError() }}</p>
+  }
+
+  <div class="grid">
+    <div class="field">
+      <label for="pf-id">ID</label>
+      <input id="pf-id" type="text" formControlName="id" autocomplete="off"
+             [class.invalid]="hasError('id')" [attr.aria-invalid]="hasError('id')" aria-describedby="pf-id-error" />
+      <p id="pf-id-error" class="error">{{ message('id') }}</p>
+    </div>
+
+    <div class="field">
+      <label for="pf-name">Nombre</label>
+      <input id="pf-name" type="text" formControlName="name" autocomplete="off"
+             [class.invalid]="hasError('name')" [attr.aria-invalid]="hasError('name')" aria-describedby="pf-name-error" />
+      <p id="pf-name-error" class="error">{{ message('name') }}</p>
+    </div>
+
+    <div class="field">
+      <label for="pf-description">Descripción</label>
+      <input id="pf-description" type="text" formControlName="description" autocomplete="off"
+             [class.invalid]="hasError('description')" [attr.aria-invalid]="hasError('description')" aria-describedby="pf-description-error" />
+      <p id="pf-description-error" class="error">{{ message('description') }}</p>
+    </div>
+
+    <div class="field">
+      <label for="pf-logo">Logo</label>
+      <input id="pf-logo" type="text" formControlName="logo" autocomplete="off"
+             [class.invalid]="hasError('logo')" [attr.aria-invalid]="hasError('logo')" aria-describedby="pf-logo-error" />
+      <p id="pf-logo-error" class="error">{{ message('logo') }}</p>
+    </div>
+
+    <div class="field">
+      <label for="pf-release">Fecha Liberación</label>
+      <input id="pf-release" type="date" formControlName="dateRelease" [min]="minDate"
+             [class.invalid]="hasError('dateRelease')" [attr.aria-invalid]="hasError('dateRelease')" aria-describedby="pf-release-error" />
+      <p id="pf-release-error" class="error">{{ message('dateRelease') }}</p>
+    </div>
+
+    <div class="field">
+      <label for="pf-revision">Fecha Revisión</label>
+      <input id="pf-revision" type="date" formControlName="dateRevision" />
+      <p class="error"></p>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn btn-secondary" (click)="reset()">Reiniciar</button>
+    <button type="submit" class="btn btn-primary" [class.faded]="form.invalid || form.pending || saving()"
+            [attr.aria-disabled]="form.invalid || form.pending || saving()" [disabled]="saving()">
+      {{ saving() ? 'Enviando...' : 'Enviar' }}
+    </button>
+  </div>
+</form>
